@@ -58,12 +58,6 @@ resource "aws_launch_template" "node_group" {
 
   vpc_security_group_ids = [aws_security_group.node_group.id]
 
-  # Remove the user_data block entirely - not needed for managed node groups
-  # user_data = base64encode(templatefile("${path.module}/user-data.sh", {
-  #   cluster_name = aws_eks_cluster.main.name
-  #   endpoint     = aws_eks_cluster.main.endpoint
-  #   ca_data      = aws_eks_cluster.main.certificate_authority[0].data
-  # }))
 
   # Instance metadata service configuration (security best practice)
   metadata_options {
