@@ -10,3 +10,17 @@ data "aws_region" "current" {}
 data "aws_availability_zones" "available" {
   state = "available"
 }
+
+# ==============================================================================
+# EKS CLUSTER DATA SOURCES (for provider configuration)
+# ==============================================================================
+
+data "aws_eks_cluster" "main" {
+  name       = aws_eks_cluster.main.name
+  depends_on = [aws_eks_cluster.main]
+}
+
+data "aws_eks_cluster_auth" "main" {
+  name       = aws_eks_cluster.main.name
+  depends_on = [aws_eks_cluster.main]
+}
