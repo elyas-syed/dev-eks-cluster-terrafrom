@@ -5,6 +5,7 @@
 variable "cluster_name" {
   description = "Name of the EKS cluster (must be unique in your AWS account)"
   type        = string
+  default     = "dev-eks-cluster" # Default name for development
 
   # Validation ensures the name follows AWS naming rules
   validation {
