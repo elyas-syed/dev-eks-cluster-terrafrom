@@ -26,7 +26,7 @@ variable "cluster_version" {
 variable "aws_region" {
   description = "AWS region where resources will be created"
   type        = string
-  default     = "us-west-2"  # Oregon region (popular choice)
+  default     = "us-east-1"  # Updated for us-east-1
 }
 
 variable "environment" {
@@ -53,16 +53,56 @@ variable "tags" {
 # VPC CONFIGURATION
 # ==============================================================================
 
-variable "create_vpc" {
-  description = "Whether to create a new VPC or use an existing one"
+variable "vpc_cidr" {
+  description = "CIDR block for the VPC"
+  type        = string
+  default     = "10.0.0.0/16"  # Gives us ~65,000 IP addresses
+}
+
+variable "availability_zones" {
+  description = "List of availability zones for us-east-1"
+  type        = list(string)
+  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
+}
+
+variable "private_subnet_cidrs" {
+  description = "CIDR blocks for private subnets (worker nodes)"
+  type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+}
+
+variable "public_subnet_cidrs" {
+  description = "CIDR blocks for public subnets (load balancers)"
+  type        = list(string)
+  default     = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+}
+
+# ==============================================================================
+# EKS CLUSTER CONFIGURATION
+# ==============================================================================
+
+variable "cluster_endpoint_private_access" {
+  description = "Enable private API server endpoint"
   type        = bool
   default     = true
 }
 
-variable "vpc_cidr" {
-  description = "CIDR block for the VPC (only used if create_vpc = true)"
-  type        = string
-  default     = "10.0.0.0/16"  # Gives us ~65,000 IP addresses
+variable "cluster_endpoint_public_access" {
+  description = "Enable public API server endpoint"
+  type        = bool
+  default     = true
+}
+
+variable "cluster_endpoint_public_access_cidrs" {
+  description = "List of CIDR blocks that can access the public endpoint"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]  # Restrict this in production!
+}
+
+variable "cluster_enabled_log_types" {
+  description = "List of control plane logging types to enable"
+  type        = list(string)
+  default     = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 }
 
 # ==============================================================================
@@ -78,6 +118,7 @@ variable "node_groups" {
     max_size      = number         # Maximum number of nodes
     desired_size  = number         # Desired number of nodes
     disk_size     = number         # Disk size in GB
+    ami_type      = string         # AMI type for nodes
   }))
   
   # Default configuration - good for learning/development
@@ -89,6 +130,7 @@ variable "node_groups" {
       max_size      = 3
       desired_size  = 2               # Start with 2 nodes
       disk_size     = 20              # 20GB should be enough for basic workloads
+      ami_type      = "AL2_x86_64"    # Amazon Linux 2
     }
   }
 }
