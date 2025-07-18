@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-nginx-app
+  namespace: default
+  labels:
+    app: sample-nginx-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sample-nginx-app
+  template:
+    metadata:
+      labels:
+        app: sample-nginx-app
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: html-volume
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html-volume
+        configMap:
+          name: nginx-html
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-html
+  namespace: default
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>EKS Sample Application</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; background: #f0f0f0; }
+            .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            .header { color: #232F3E; border-bottom: 2px solid #FF9900; padding-bottom: 10px; }
+            .info { margin: 20px 0; }
+            .success { color: #28a745; font-weight: bold; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="header">🚀 EKS Cluster Sample Application</h1>
+            <div class="info">
+                <p class="success">✅ Successfully deployed on Amazon EKS!</p>
+                <p><strong>Features enabled:</strong></p>
+                <ul>
+                    <li>AWS Load Balancer Controller (ALB)</li>
+                    <li>EBS CSI Driver for persistent storage</li>
+                    <li>Cluster Autoscaler for auto-scaling</li>
+                    <li>Metrics Server for monitoring</li>
+                </ul>
+                <p><strong>Pod Information:</strong></p>
+                <p>Hostname: <span id="hostname"></span></p>
+                <p>Timestamp: <span id="timestamp"></span></p>
+            </div>
+        </div>
+        <script>
+            document.getElementById('hostname').textContent = window.location.hostname;
+            document.getElementById('timestamp').textContent = new Date().toLocaleString();
+        </script>
+    </body>
+    </html>
