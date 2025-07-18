@@ -105,6 +105,7 @@ resource "aws_eks_addon" "ebs_csi" {
 
   depends_on = [
     aws_eks_cluster.main,
+    aws_eks_node_group.main,
     aws_iam_role_policy_attachment.ebs_csi
   ]
 

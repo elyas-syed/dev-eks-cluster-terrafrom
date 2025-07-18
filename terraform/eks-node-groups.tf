@@ -8,13 +8,14 @@ resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "${var.cluster_name}-${each.key}"
   node_role_arn   = aws_iam_role.node_group.arn
-  subnet_ids      = aws_subnet.private[*].id # Deploy nodes in private subnets
+  subnet_ids      = aws_subnet.private[*].id
 
   # Instance configuration
   instance_types = each.value.instance_types
   capacity_type  = each.value.capacity_type
   ami_type       = each.value.ami_type
-  disk_size      = each.value.disk_size
+  # Remove disk_size from here - it should be in launch template
+  # disk_size      = each.value.disk_size
 
   # Scaling configuration
   scaling_config {
@@ -58,6 +59,16 @@ resource "aws_launch_template" "node_group" {
 
   vpc_security_group_ids = [aws_security_group.node_group.id]
 
+  # Add block device mapping for disk size
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_size = each.value.disk_size
+      volume_type = "gp3"
+      encrypted   = true
+      delete_on_termination = true
+    }
+  }
 
   # Instance metadata service configuration (security best practice)
   metadata_options {
