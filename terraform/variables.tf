@@ -21,7 +21,7 @@ variable "cluster_name" {
 variable "cluster_version" {
   description = "Kubernetes version for the EKS cluster"
   type        = string
-  default     = "1.28" # Latest stable version as of 2024
+  default     = "1.31" # Updated to latest stable version
 }
 
 variable "aws_region" {
