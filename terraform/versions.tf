@@ -9,16 +9,16 @@ terraform {
   required_providers {
     # AWS provider - talks to Amazon Web Services
     aws = {
-      source  = "hashicorp/aws"  # Where to download from
-      version = ">= 5.0"         # Minimum version
+      source  = "hashicorp/aws" # Where to download from
+      version = ">= 5.0"        # Minimum version
     }
-    
+
     # Kubernetes provider - manages Kubernetes resources
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = ">= 2.20"
     }
-    
+
     # Helm provider - installs applications on Kubernetes
     helm = {
       source  = "hashicorp/helm"

@@ -32,10 +32,10 @@ resource "aws_security_group" "node_group" {
 
   # Allow nodes to communicate with each other
   ingress {
-    from_port = 0
-    to_port   = 65535
-    protocol  = "tcp"
-    self      = true
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    self        = true
     description = "Allow nodes to communicate with each other"
   }
 

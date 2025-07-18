@@ -8,7 +8,7 @@ resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "${var.cluster_name}-${each.key}"
   node_role_arn   = aws_iam_role.node_group.arn
-  subnet_ids      = aws_subnet.private[*].id  # Deploy nodes in private subnets
+  subnet_ids      = aws_subnet.private[*].id # Deploy nodes in private subnets
 
   # Instance configuration
   instance_types = each.value.instance_types
@@ -25,7 +25,7 @@ resource "aws_eks_node_group" "main" {
 
   # Update configuration
   update_config {
-    max_unavailable_percentage = 25  # Allow 25% of nodes to be unavailable during updates
+    max_unavailable_percentage = 25 # Allow 25% of nodes to be unavailable during updates
   }
 
   # Launch template configuration
@@ -62,7 +62,7 @@ resource "aws_launch_template" "node_group" {
   # Instance metadata service configuration (security best practice)
   metadata_options {
     http_endpoint               = "enabled"
-    http_tokens                 = "required"  # Require IMDSv2
+    http_tokens                 = "required" # Require IMDSv2
     http_put_response_hop_limit = 2
     instance_metadata_tags      = "enabled"
   }

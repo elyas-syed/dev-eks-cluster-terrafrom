@@ -4,12 +4,12 @@
 
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
-  enable_dns_hostnames = true  # Required for EKS
-  enable_dns_support   = true  # Required for EKS
+  enable_dns_hostnames = true # Required for EKS
+  enable_dns_support   = true # Required for EKS
 
   tags = {
     Name                                        = "${var.cluster_name}-vpc"
-    "kubernetes.io/cluster/${var.cluster_name}" = "shared"  # Required for EKS
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared" # Required for EKS
   }
 }
 
@@ -35,13 +35,13 @@ resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.public_subnet_cidrs[count.index]
   availability_zone       = var.availability_zones[count.index]
-  map_public_ip_on_launch = true  # Instances get public IPs
+  map_public_ip_on_launch = true # Instances get public IPs
 
   tags = {
     Name                                        = "${var.cluster_name}-public-${var.availability_zones[count.index]}"
     Type                                        = "Public"
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-    "kubernetes.io/role/elb"                    = "1"  # For load balancers
+    "kubernetes.io/role/elb"                    = "1" # For load balancers
   }
 }
 
@@ -59,8 +59,8 @@ resource "aws_subnet" "private" {
   tags = {
     Name                                        = "${var.cluster_name}-private-${var.availability_zones[count.index]}"
     Type                                        = "Private"
-    "kubernetes.io/cluster/${var.cluster_name}" = "owned"  # EKS owns these subnets
-    "kubernetes.io/role/internal-elb"           = "1"      # For internal load balancers
+    "kubernetes.io/cluster/${var.cluster_name}" = "owned" # EKS owns these subnets
+    "kubernetes.io/role/internal-elb"           = "1"     # For internal load balancers
   }
 }
 
@@ -71,7 +71,7 @@ resource "aws_subnet" "private" {
 resource "aws_eip" "nat" {
   count = length(var.availability_zones)
 
-  domain = "vpc"
+  domain     = "vpc"
   depends_on = [aws_internet_gateway.main]
 
   tags = {
@@ -104,7 +104,7 @@ resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
   route {
-    cidr_block = "0.0.0.0/0"  # All traffic
+    cidr_block = "0.0.0.0/0" # All traffic
     gateway_id = aws_internet_gateway.main.id
   }
 
@@ -120,7 +120,7 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
   route {
-    cidr_block     = "0.0.0.0/0"  # All traffic
+    cidr_block     = "0.0.0.0/0" # All traffic
     nat_gateway_id = aws_nat_gateway.main[count.index].id
   }
 
