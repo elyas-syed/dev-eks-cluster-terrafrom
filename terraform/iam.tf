@@ -91,3 +91,48 @@ resource "aws_iam_openid_connect_provider" "cluster" {
     Name = "${var.cluster_name}-oidc"
   }
 }
+
+# ==============================================================================
+# EBS CSI DRIVER IAM ROLE (for IAM roles for service accounts)
+# ==============================================================================
+
+# Trust policy for EBS CSI driver service account
+data "aws_iam_policy_document" "ebs_csi_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.cluster.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.cluster.url, "https://", "")}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.cluster.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+# Create the EBS CSI driver IAM role
+resource "aws_iam_role" "ebs_csi" {
+  name               = "${var.cluster_name}-ebs-csi-driver-role"
+  assume_role_policy = data.aws_iam_policy_document.ebs_csi_assume_role_policy.json
+
+  tags = {
+    Name = "${var.cluster_name}-ebs-csi-driver-role"
+  }
+}
+
+# Attach the AWS managed EBS CSI driver policy
+resource "aws_iam_role_policy_attachment" "ebs_csi" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/Amazon_EBS_CSI_DriverPolicy"
+  role       = aws_iam_role.ebs_csi.name
+}

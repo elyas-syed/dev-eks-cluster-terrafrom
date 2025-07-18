@@ -90,3 +90,12 @@ output "node_group_iam_role_arn" {
   description = "IAM role ARN of the EKS node group"
   value       = aws_iam_role.node_group.arn
 }
+
+# ==============================================================================
+# IAM ROLE INFORMATION
+# ==============================================================================
+
+output "ebs_csi_driver_role_arn" {
+  description = "ARN of the EBS CSI driver IAM role"
+  value       = aws_iam_role.ebs_csi.arn
+}
