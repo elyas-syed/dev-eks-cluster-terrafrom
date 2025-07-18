@@ -363,3 +363,77 @@ resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller" {
   policy_arn = aws_iam_policy.aws_load_balancer_controller.arn
   role       = aws_iam_role.aws_load_balancer_controller.name
 }
+
+# ==============================================================================
+# CLUSTER AUTOSCALER IAM ROLE (IRSA)
+# ==============================================================================
+
+# Trust policy for Cluster Autoscaler service account
+data "aws_iam_policy_document" "cluster_autoscaler_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.cluster.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:cluster-autoscaler"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.cluster.url, "https://", "")}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.cluster.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+# Create the Cluster Autoscaler IAM role
+resource "aws_iam_role" "cluster_autoscaler" {
+  name               = "${var.cluster_name}-cluster-autoscaler-role"
+  assume_role_policy = data.aws_iam_policy_document.cluster_autoscaler_assume_role_policy.json
+
+  tags = {
+    Name = "${var.cluster_name}-cluster-autoscaler-role"
+  }
+}
+
+# Cluster Autoscaler IAM policy
+data "aws_iam_policy_document" "cluster_autoscaler" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "autoscaling:DescribeAutoScalingGroups",
+      "autoscaling:DescribeAutoScalingInstances",
+      "autoscaling:DescribeLaunchConfigurations",
+      "autoscaling:DescribeTags",
+      "autoscaling:SetDesiredCapacity",
+      "autoscaling:TerminateInstanceInAutoScalingGroup",
+      "ec2:DescribeLaunchTemplateVersions",
+      "ec2:DescribeInstanceTypes"
+    ]
+    resources = ["*"]
+  }
+}
+
+# Create the IAM policy
+resource "aws_iam_policy" "cluster_autoscaler" {
+  name        = "${var.cluster_name}-cluster-autoscaler-policy"
+  description = "IAM policy for Cluster Autoscaler"
+  policy      = data.aws_iam_policy_document.cluster_autoscaler.json
+
+  tags = {
+    Name = "${var.cluster_name}-cluster-autoscaler-policy"
+  }
+}
+
+# Attach the policy to the role
+resource "aws_iam_role_policy_attachment" "cluster_autoscaler" {
+  policy_arn = aws_iam_policy.cluster_autoscaler.arn
+  role       = aws_iam_role.cluster_autoscaler.name
+}
