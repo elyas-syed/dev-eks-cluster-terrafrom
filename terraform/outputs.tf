@@ -95,7 +95,24 @@ output "node_group_iam_role_arn" {
 # IAM ROLE INFORMATION
 # ==============================================================================
 
+# EBS CSI Driver IAM Role ARN
 output "ebs_csi_driver_role_arn" {
-  description = "ARN of the EBS CSI driver IAM role"
+  description = "ARN of the EBS CSI Driver IAM role"
   value       = aws_iam_role.ebs_csi.arn
+}
+
+# Cluster Autoscaler IAM Role ARN
+output "cluster_autoscaler_role_arn" {
+  description = "ARN of the Cluster Autoscaler IAM role"
+  value       = aws_iam_role.cluster_autoscaler.arn
+}
+
+output "oidc_provider_arn" {
+  description = "ARN of the OIDC Provider for IRSA"
+  value       = aws_iam_openid_connect_provider.cluster.arn
+}
+
+output "aws_load_balancer_controller_role_arn" {
+  description = "ARN of the AWS Load Balancer Controller IAM role"
+  value       = aws_iam_role.aws_load_balancer_controller.arn
 }
