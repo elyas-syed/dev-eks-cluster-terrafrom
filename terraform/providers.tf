@@ -1,4 +1,30 @@
-# Configure the AWS Provider
+# ==============================================================================
+# TERRAFORM AND PROVIDER CONFIGURATIONS
+# ==============================================================================
+
+terraform {
+  required_version = ">= 1.0"
+  
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 5.0"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = ">= 2.20"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">= 2.9"
+    }
+  }
+}
+
+# ==============================================================================
+# AWS PROVIDER CONFIGURATION
+# ==============================================================================
+
 provider "aws" {
   region = var.aws_region
 
@@ -6,24 +32,15 @@ provider "aws" {
     tags = merge(var.tags, {
       Environment = var.environment
       Project     = "EKS-Custom"
+      ManagedBy   = "Terraform"
     })
   }
 }
 
 # ==============================================================================
-# DATA SOURCES
+# KUBERNETES PROVIDER CONFIGURATION
 # ==============================================================================
 
-# Data source to get current AWS account ID and region
-data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
-
-# Data source to get available availability zones
-data "aws_availability_zones" "available" {
-  state = "available"
-}
-
-# Configure Kubernetes provider
 provider "kubernetes" {
   host                   = aws_eks_cluster.main.endpoint
   cluster_ca_certificate = base64decode(aws_eks_cluster.main.certificate_authority[0].data)
@@ -35,7 +52,10 @@ provider "kubernetes" {
   }
 }
 
-# Configure Helm provider
+# ==============================================================================
+# HELM PROVIDER CONFIGURATION
+# ==============================================================================
+
 provider "helm" {
   kubernetes {
     host                   = aws_eks_cluster.main.endpoint
