@@ -5,6 +5,7 @@
 variable "cluster_name" {
   description = "Name of the EKS cluster (must be unique in your AWS account)"
   type        = string
+  default     = "dev-eks-cluster"  # Add this line
 
   validation {
     condition     = can(regex("^[a-zA-Z][a-zA-Z0-9-]*$", var.cluster_name))
@@ -27,6 +28,7 @@ variable "aws_region" {
 variable "environment" {
   description = "Environment name (dev, staging, prod)"
   type        = string
+  default     = "dev"
 
   validation {
     condition     = contains(["dev", "staging", "prod"], var.environment)
@@ -108,7 +110,7 @@ variable "node_groups" {
   
   default = {
     general = {
-      instance_types = ["t3.medium"]
+      instance_types = ["t3.micro"]
       capacity_type  = "ON_DEMAND"
       ami_type       = "AL2_x86_64"
       disk_size      = 20
